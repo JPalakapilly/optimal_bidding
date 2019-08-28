@@ -106,6 +106,6 @@ ENV/
 .DS_Store
 .idea/
 market_env/
-.csv
-.CSV
-.ipynb
+*.csv
+*.CSV
+*.ipynb
