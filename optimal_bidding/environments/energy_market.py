@@ -82,3 +82,88 @@ class Bid():
     def power(self):
         pass
 
+class TraditionalGenco():
+    """
+    Genco agent that follows the model given in the actor critic paper
+    """
+
+
+    def __init__(self, a=0, b=3.0, c=.03, startup_cost=50, capacity=100):
+        super().init()
+        self.a = a
+        self.b = b
+        self.c = c
+        self.startup_cost = startup_cost
+        self.capacity = capacity
+
+    def set_cost_curve_coefficients(self, a, b, c):
+        self.a = a
+        self.b = b
+        self.c = c
+
+
+    def set_startup_cost(self, startup_cost):
+        self.startup_cost = startup_cost
+
+
+    def cost_curve(self, U):
+        return a + b * U + c * U**2
+
+
+    def bid(self, time_step=0, bid_parts=3):
+        """Computes the bid at certain time step
+
+        Args:
+          time_step: timestamp UTC
+
+        Return:
+          bid: Bid object
+        """
+
+        # if preferences don't just do random sampling
+        # TODO
+        if self.preferences:
+            pass
+        else:
+            bid_set = self.create_bid_set(3)
+            r = np.random.randint(len(bid_set))
+            bid_prices = bid_set[r]
+            # TODO get power points and return
+
+            
+
+
+    def create_bid_set(self, bid_parts):
+        """
+        Creates the price part of the bid set as defined in the actor-critic genco paper. 
+        
+        Parameters
+        ----------
+        bid_parts: int
+            The capacity will be split into bid_parts parts each with a different bid price
+
+        Returns
+        -------
+        bid_set: Nxbid_parts array
+            Each row in this array represents a possible bid. The ith column in the array
+            represents the price for the ith part of the capacity.
+            N = 3**bid_parts
+
+        """
+
+        part_capacity = self.capacity / bid_parts
+
+
+        cost_list = []
+        for i in range(bid_parts):
+            # upper end of cost curve
+            m_cost = self.cost_curve(part_capacity * (i+1))
+
+            # get high and low costs
+            h_cost = 1.1 * m_cost
+            l_cost = .9  * m_cost
+            
+            cost_list.append(np.array([l_cost, m_cost, h_cost]))
+
+        bid_set = np.array(np.meshgrid(*cost_list)).T.reshape(-1,len(cost_list))
+        return bid_set
